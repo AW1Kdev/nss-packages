@@ -1,0 +1,191 @@
+#!/bin/sh
+
+set -eu
+
+PKG="xraycustom"
+SEC="main"
+
+uci_get() {
+	uci -q get "$PKG.$SEC.$1" 2>/dev/null || true
+}
+
+json_escape() {
+	printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+fetch_versions_json() {
+	local list_url tmp versions
+
+	list_url="$(uci_get list_url)"
+	[ -n "$list_url" ] || list_url="https://raw.githubusercontent.com/AW1Kdev/xray/main/list.json"
+
+	tmp="$(mktemp)"
+
+	if ! wget -qO "$tmp" "$list_url"; then
+		rm -f "$tmp"
+		printf '{"ok":false,"error":"failed to fetch list","url":"%s"}\n' "$(json_escape "$list_url")"
+		return 1
+	fi
+
+	if [ ! -s "$tmp" ]; then
+		rm -f "$tmp"
+		echo '{"ok":false,"error":"empty list file"}'
+		return 1
+	fi
+
+	versions="$(sed -n '/"versions"[[:space:]]*:/,/]/p' "$tmp" \
+		| tr '\n' ' ' \
+		| sed 's/.*"versions"[[:space:]]*:[[:space:]]*\[//; s/\].*//' \
+		| tr ',' '\n' \
+		| sed 's/"//g; s/^[[:space:]]*//; s/[[:space:]]*$//' \
+		| sed '/^$/d')"
+
+	rm -f "$tmp"
+
+	printf '['
+	local first=1 v
+	for v in $versions; do
+		[ $first -eq 1 ] || printf ','
+		first=0
+		printf '"%s"' "$(json_escape "$v")"
+	done
+	printf ']\n'
+}
+
+status_json() {
+	local bin cur base_url list_url installed_version
+
+	bin="$(uci_get binary_path)"
+	base_url="$(uci_get base_url)"
+	list_url="$(uci_get list_url)"
+	installed_version="$(uci -q get $PKG.$SEC.installed_version 2>/dev/null || true)"
+
+	[ -n "$bin" ] || bin="/usr/bin/xray"
+
+	cur=""
+	if [ -x "$bin" ]; then
+		cur="$("$bin" version 2>/dev/null | awk 'NR==1 {print $2}')"
+	fi
+
+	printf '{'
+	printf '"binary_path":"%s",' "$(json_escape "$bin")"
+	printf '"current_version":"%s",' "$(json_escape "$cur")"
+	printf '"installed_version":"%s",' "$(json_escape "$installed_version")"
+	printf '"base_url":"%s",' "$(json_escape "$base_url")"
+	printf '"list_url":"%s"' "$(json_escape "$list_url")"
+	printf '}\n'
+}
+
+install_version() {
+	local ver base_url bin backup restart service tmp url enabled bindir
+
+	ver="${1:-}"
+	enabled="$(uci_get enabled)"
+
+	[ "$enabled" = "1" ] || {
+		echo '{"ok":false,"error":"xraycustom disabled"}'
+		exit 1
+	}
+
+	[ -n "$ver" ] || {
+		echo '{"ok":false,"error":"missing version"}'
+		exit 1
+	}
+
+	base_url="$(uci_get base_url)"
+	bin="$(uci_get binary_path)"
+	backup="$(uci_get backup)"
+	restart="$(uci_get restart_service)"
+	service="$(uci_get service_name)"
+
+	[ -n "$base_url" ] || base_url="https://raw.githubusercontent.com/AW1Kdev/xray/main"
+	[ -n "$bin" ] || bin="/usr/bin/xray"
+	[ -n "$service" ] || service="xray"
+
+	bindir="$(dirname "$bin")"
+	mkdir -p "$bindir"
+
+	tmp="$(mktemp)"
+	url="${base_url}/${ver}/xray"
+
+	if ! wget -qO "$tmp" "$url"; then
+		rm -f "$tmp"
+		printf '{"ok":false,"error":"download failed","url":"%s"}\n' "$(json_escape "$url")"
+		exit 1
+	fi
+
+	if [ ! -s "$tmp" ]; then
+		rm -f "$tmp"
+		echo '{"ok":false,"error":"downloaded file is empty"}'
+		exit 1
+	fi
+
+	# backup current /usr/bin/xray if enabled
+	if [ "$backup" = "1" ] && [ -f "$bin" ]; then
+		cp -f "$bin" "${bin}.bak"
+	fi
+
+	# remove old /usr/bin/xray first
+	rm -f "$bin"
+
+	# replace with custom downloaded xray
+	cp -f "$tmp" "$bin"
+	chmod 0755 "$bin"
+	rm -f "$tmp"
+
+	uci -q set "$PKG.$SEC.installed_version=$ver"
+	uci -q commit "$PKG"
+
+	if [ "$restart" = "1" ] && [ -x "/etc/init.d/$service" ]; then
+		/etc/init.d/"$service" restart >/dev/null 2>&1 || true
+	fi
+
+	printf '{"ok":true,"installed_version":"%s","path":"%s"}\n' \
+		"$(json_escape "$ver")" \
+		"$(json_escape "$bin")"
+}
+
+rollback_version() {
+	local bin restart service
+
+	bin="$(uci_get binary_path)"
+	restart="$(uci_get restart_service)"
+	service="$(uci_get service_name)"
+
+	[ -n "$bin" ] || bin="/usr/bin/xray"
+	[ -n "$service" ] || service="xray"
+
+	if [ ! -f "${bin}.bak" ]; then
+		echo '{"ok":false,"error":"backup not found"}'
+		exit 1
+	fi
+
+	rm -f "$bin"
+	cp -f "${bin}.bak" "$bin"
+	chmod 0755 "$bin"
+
+	if [ "$restart" = "1" ] && [ -x "/etc/init.d/$service" ]; then
+		/etc/init.d/"$service" restart >/dev/null 2>&1 || true
+	fi
+
+	echo '{"ok":true,"message":"rollback complete"}'
+}
+
+case "${1:-}" in
+	versions)
+		fetch_versions_json
+		;;
+	status)
+		status_json
+		;;
+	install)
+		install_version "${2:-}"
+		;;
+	rollback)
+		rollback_version
+		;;
+	*)
+		echo "Usage: $0 {versions|status|install <version>|rollback}" >&2
+		exit 1
+		;;
+esac

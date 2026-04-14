@@ -1,0 +1,11 @@
+{
+  "luci-app-xraycustom": {
+    "description": "Grant access to Xray Custom Installer",
+    "read": {
+      "uci": [ "xraycustom" ]
+    },
+    "write": {
+      "uci": [ "xraycustom" ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "admin/tools/xraycustom": {
+    "title": "Xray Custom",
+    "order": 90,
+    "action": {
+      "type": "view",
+      "path": "xraycustom"
+    }
+  }
+}
