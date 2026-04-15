@@ -154,7 +154,7 @@ return view.extend({
 				typeStrx: '#22c55e',
 				typeStock: '#f59e0b',
 				latestColor: '#60a5fa',
-				titleText: '#fc000d',
+				titleText: '#fcfcfc',
 				descText: 'rgba(255,255,255,0.82)'
 			};
 		}
@@ -908,11 +908,9 @@ return view.extend({
 				}
 			`]),
 
-			E('h2', {}, [ _('Xray Custom') ]),
+			E('h2', {}, [ _('Project X') ]),
 			E('div', { 'class': 'cbi-map-descr' }, [
-				_('Install custom Xray core from remote list.json'),
-				E('br'),
-				'Credit to: dotycat • xray xtls • strx'
+				'Credit to: DotyCat • Project X • STRX'
 			]),
 
 			E('div', { 'class': 'xray-section' }, [
