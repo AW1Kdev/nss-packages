@@ -1,6 +1,6 @@
 {
   "admin/tools/xraycustom": {
-    "title": "Xray Custom",
+    "title": "Project X",
     "order": 90,
     "action": {
       "type": "view",
