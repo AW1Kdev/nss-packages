@@ -1,143 +1,149 @@
 #!/bin/sh /etc/rc.common
-# vim: set syn=bash
-# shellcheck disable=2155,3010,3019,3043,3057,3060
 
-# shellcheck disable=2034
 START=94
+USE_PROCD=0
+
 PROG="qca-nss-drv"
 
 log_msg() {
-
-  local irq_name="$1" affinity="$2" occurrence="$3" irq="$4"
-
-  msg="$(printf "Pinning IRQ($irq) %-24s to CPU ${affinity}\n" "$irq_name")"
-
-  [[ $irq_name =~ "nss" ]] && msg="$msg (NSS Core $((occurrence - 1)))"
-
-  logger -t "$PROG" "$msg"
+	local msg="$1"
+	logger -t "$PROG" "$msg"
 }
-
-######################################################################
-### Takes a comma, space separated, or range list of CPU numbers and
-## returns a bitmask of CPUs.
-## cpus_to_bitmask "0,1,2,3" -> f
-## cpus_to_bitmask "0 1 2 3" -> f
-## cpus_to_bitmask "0-3"     -> f
-## cpus_to_bitmask "3"       -> 8
-#######################################################################
 
 cpus_to_bitmask() {
+	local bitmask=0
+	local range start end i
 
-  local bitmask=0
-  # shellcheck disable=2048
-  for range in ${*//,/ }; do
-    start="${range%-*}"
-    end="${range#*-}"
-    if [ -z "$end" ]; then
-      bitmask="$((bitmask | 1 << start))"
-    else
-      bitmask="$((bitmask | (2 ** (end - start + 1) - 1) << start))"
-    fi
-  done
-  printf '%x' $bitmask
+	for range in ${*//,/ }; do
+		case "$range" in
+			*-*)
+				start="${range%-*}"
+				end="${range#*-}"
+				i="$start"
+				while [ "$i" -le "$end" ]; do
+					bitmask=$((bitmask | (1 << i)))
+					i=$((i + 1))
+				done
+			;;
+			*)
+				bitmask=$((bitmask | (1 << range)))
+			;;
+		esac
+	done
+
+	printf '%x\n' "$bitmask"
 }
 
-######################################################################
-### Takes a bitmask of CPUs and returns a space separated list of
-## CPU numbers.
-## bitmask_to_cpus f -> 0 1 2 3
-######################################################################
+set_irq_affinity() {
+	local irq_name="$1"
+	local cpu_list="$2"
+	local occurrence="${3:-1}"
+	local irq bitmask count
 
-bitmask_to_cpus() {
+	bitmask="$(cpus_to_bitmask "$cpu_list")"
+	count=0
 
-  [ "${1:0:2}" != "0x" ] && set -- "0x$1"
-  local bitmask="$(printf '%d' "$1")"
+	while read -r irq _rest; do
+		irq="${irq%:}"
+		name="$(echo "$_rest" | awk '{print $NF}')"
 
-  local cpus=""
-  for i in $(seq 0 63); do
-    if [ $((bitmask & 1)) -ne 0 ]; then
-      cpus="$cpus $i"
-    fi
-    bitmask=$((bitmask >> 1))
-  done
-  echo "${cpus# }"
+		[ "$name" = "$irq_name" ] || continue
+
+		count=$((count + 1))
+		[ "$count" -eq "$occurrence" ] || continue
+
+		if [ -w "/proc/irq/$irq/smp_affinity" ]; then
+			echo "$bitmask" > "/proc/irq/$irq/smp_affinity"
+			$enable_log && log_msg "Pin IRQ($irq) $irq_name -> CPU(s) $cpu_list [mask $bitmask]"
+		fi
+		return 0
+	done < /proc/interrupts
+
+	$enable_log && log_msg "IRQ not found: $irq_name occurrence $occurrence"
+	return 1
 }
 
-######################################################################
-### Sets the affinity of the IRQs with the given name to the given CPU.
-## first argument: IRQ name ("nss_queue0")
-## second argument: CPU number
-## third argument: occurrence of the IRQ name
-##                 since NSS core 0/1 share the same IRQ names
-## set_affinity "nss_queue0" 1 1
+set_rps_for_all_rx() {
+	local mask="$1"
+	local flow_entries="${2:-32768}"
+	local qfile
 
-set_affinity() {
+	[ -w /proc/sys/net/core/rps_sock_flow_entries ] && \
+		echo "$flow_entries" > /proc/sys/net/core/rps_sock_flow_entries
 
-  local irq_name="$1" affinity="$2" occurrence="${3:-1}" bitmask
+	for qfile in /sys/class/net/*/queues/rx-*/rps_cpus; do
+		[ -f "$qfile" ] || continue
+		echo "$mask" > "$qfile" 2>/dev/null
+		$enable_log && log_msg "Set RPS $qfile -> $mask"
+	done
 
-  awk -v irq_name="$irq_name" -v occurrence="$occurrence" '
-    BEGIN{count=0}
-    $NF==irq_name {
-      if(++count==occurrence){
-        sub(/:$/,"",$1)
-        print $1
-      }
-  }' /proc/interrupts | while read -r irq; do
-    $enable_log && {
-      log_msg "$irq_name" "$affinity" "$occurrence" "$irq"
-    }
-    bitmask=$(cpus_to_bitmask "$affinity") && echo "$bitmask" > /proc/irq/"$irq"/smp_affinity
-  done
+	for qfile in /sys/class/net/*/queues/rx-*/rps_flow_cnt; do
+		[ -f "$qfile" ] || continue
+		echo 4096 > "$qfile" 2>/dev/null
+	done
 }
 
-enable_rps() {
+set_xps_for_all_tx() {
+	local mask="$1"
+	local qfile
 
-  # NSS Core 0 : 4 nss queues to each core
-  set_affinity "nss_queue0"                 0 1
-  set_affinity "nss_queue1"                 1 1
-  set_affinity "nss_queue2"                 2 1
-  set_affinity "nss_queue3"                 3 1
+	for qfile in /sys/class/net/*/queues/tx-*/xps_cpus; do
+		[ -f "$qfile" ] || continue
+		echo "$mask" > "$qfile" 2>/dev/null
+		$enable_log && log_msg "Set XPS $qfile -> $mask"
+	done
+}
 
-  # NSS Core 1 : 1 nss queue to 3rd core
-  set_affinity "nss_queue0"                 3 2
-  set_affinity "nss_queue1"                 2 2
-  set_affinity "nss_queue2"                 1 2
-  set_affinity "nss_queue3"                 0 2
-
-  # NSS Core 0 : 2 nss sos/queues to last core
-  set_affinity "nss_empty_buf_sos"          0 1
-  set_affinity "nss_empty_buf_queue"        0 1
-
-  # NSS Core 1 : 1 nss sos to last core
-  set_affinity "nss_empty_buf_sos"          3 2
-  set_affinity "nss_empty_buf_queue"        3 2
-
-  # USB 3.0 : pin to 3rd core
-  set_affinity "xhci-hcd:usb1"              2 1
-  set_affinity "xhci-hcd:usb2"              2 1
-  set_affinity "xhci-hcd:usb3"              2 1
-
-  # TCL Completion, REO Dest, ERR, Exception and h2rxdma
-  # are offloaded, so balance remaining IRQs accordingly.
-  # PPDU IRQ : pin to 2nd and 3rd core
-  set_affinity 'ppdu-end-interrupts-mac1'   2 1
-  set_affinity 'ppdu-end-interrupts-mac2'   3 1
-  set_affinity 'ppdu-end-interrupts-mac3'   1 1
-
-  set_affinity 'ath10k_pci'               2,3 1
-
-  # Enable NSS RPS
-  sysctl -w dev.nss.rps.enable=1 >/dev/null 2>&1
+apply_balance() {
+	set_irq_affinity "nss_queue0"          "0" 1
+	set_irq_affinity "nss_queue1"          "1" 1
+	set_irq_affinity "nss_queue2"          "2" 1
+	set_irq_affinity "nss_queue3"          "3" 1
+	set_irq_affinity "nss_queue0"          "3" 2
+	set_irq_affinity "nss_queue1"          "2" 2
+	set_irq_affinity "nss_queue2"          "1" 2
+	set_irq_affinity "nss_queue3"          "0" 2
+	set_irq_affinity "nss_empty_buf_sos"   "1" 1
+	set_irq_affinity "nss_empty_buf_queue" "1" 1
+	set_irq_affinity "nss_empty_buf_sos"   "2" 2
+	set_irq_affinity "nss_empty_buf_queue" "2" 2
+	set_irq_affinity "xhci-hcd:usb1"       "2" 1
+	set_irq_affinity "xhci-hcd:usb2"       "3" 1
+	set_irq_affinity "xhci-hcd:usb3"       "2" 1
+	set_irq_affinity "ppdu-end-interrupts-mac1" "1" 1
+	set_irq_affinity "ppdu-end-interrupts-mac2" "2" 1
+	set_irq_affinity "ppdu-end-interrupts-mac3" "3" 1
+	set_irq_affinity "ath10k_pci"          "1-3" 1
+	set_irq_affinity "ath11k_pci"          "1-3" 1
+	sysctl -w dev.nss.rps.enable=1 >/dev/null 2>&1
+	set_rps_for_all_rx "e" 32768
+	set_xps_for_all_tx "e"
 }
 
 start() {
+	local enabled
 
-  local enable_rps
+	. /lib/functions.sh
 
-  config_load     nss
-  config_get      enable_rps "general" enable_rps 1
-  config_get_bool enable_log "general" enable_log 1
+	config_load nss
+	config_get enabled    general enable_rps 1
+	config_get_bool elog  general enable_log 1
 
-  [ "$enable_log" -eq 1 ] && enable_log=true || enable_log=false
-  [ "$enable_rps" -eq 1 ] && enable_rps
+	[ "$elog" -eq 1 ] && enable_log=true || enable_log=false
+
+	[ "$enabled" -eq 1 ] || {
+		$enable_log && log_msg "RPS balancing disabled in UCI"
+		return 0
+	}
+
+	apply_balance
+}
+
+stop() {
+	:
+}
+
+restart() {
+	stop
+	start
 }
