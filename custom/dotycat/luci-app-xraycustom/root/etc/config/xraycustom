@@ -8,4 +8,5 @@ config xraycustom 'main'
 	option restart_service '1'
 	option service_name 'xray'
 	option _selected_version 'Null'
-	option installed_version 'Null'
+	option installed_version '26.2.6'
+
