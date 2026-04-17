@@ -257,7 +257,7 @@
 	}
 
 	.px-panel {
-		background: var(--px-bg); 
+		background: var(--px-bg);
 		border-radius: 10px;
 		padding: 10px;
 		box-shadow: var(--px-shadow-soft);
@@ -266,7 +266,7 @@
 	}
 
 	.px-panel-title {
-		background: var(--px-bg-soft); 
+		background: var(--px-bg-soft);
 		border-radius: 6px;
 		padding: 12px 14px;
 		font-size: 16px;
@@ -303,7 +303,7 @@
 	.px-stat,
 	.px-wide-card,
 	.px-metric-row {
-		background: var(--px-bg-strong); 
+		background: var(--px-bg-strong);
 		border-radius: 6px;
 		padding: 14px 16px;
 		min-width: 0;
@@ -388,21 +388,10 @@
 		box-sizing: border-box;
 	}
 
-	.progress-red {
-		background: linear-gradient(90deg, #ff4d4f, #ff7875);
-	}
-
-	.progress-orange {
-		background: linear-gradient(90deg, #fa8c16, #ffc069);
-	}
-
-	.progress-yellow {
-		background: linear-gradient(90deg, #fadb14, #fff566);
-	}
-
-	.progress-green {
-		background: linear-gradient(90deg, #52c41a, #237804);
-	}
+	.progress-red { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
+	.progress-orange { background: linear-gradient(90deg, #fa8c16, #ffc069); }
+	.progress-yellow { background: linear-gradient(90deg, #fadb14, #fff566); }
+	.progress-green { background: linear-gradient(90deg, #52c41a, #237804); }
 
 	.px-form-label {
 		display: block;
@@ -595,51 +584,181 @@ function calculatePercentage(value, min, max) {
 	return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
 }
 
-function updateProgressBar(elementId, valueId, value, min, max, isPercentage, labelText) {
-	const wrap = document.getElementById(elementId);
-	if (!wrap) return;
+function normalizeMetricValue(value) {
+	if (value === null || value === undefined)
+		return null;
 
+	if (typeof value === 'string') {
+		const s = value.trim().toLowerCase();
+		if (!s || s === 'no signal' || s === 'n/a' || s === '-' || s === '--')
+			return null;
+	}
+
+	const num = parseFloat(value);
+	return isNaN(num) ? null : num;
+}
+
+function setNoSignalState(progressBarInner, progressValue) {
+	progressBarInner.style.width = '0%';
+	progressBarInner.className = 'progress-bar-inner';
+	progressValue.innerText = '';
+}
+
+function getQualityText(colorClass) {
+	switch (colorClass) {
+	case 'progress-green': return 'Good';
+	case 'progress-yellow': return 'Fair';
+	case 'progress-orange': return 'Weak';
+	default: return 'Poor';
+	}
+}
+
+function getMetricVisual(metricName, value, isPercentage, min, max) {
+	let percentage = 0;
+	let colorClass = 'progress-red';
+
+	if (isPercentage) {
+		percentage = calculatePercentage(value, min, max);
+
+		if (percentage <= 25)
+			colorClass = 'progress-red';
+		else if (percentage <= 50)
+			colorClass = 'progress-orange';
+		else if (percentage <= 75)
+			colorClass = 'progress-yellow';
+		else
+			colorClass = 'progress-green';
+
+		return { percentage: percentage, colorClass: colorClass };
+	}
+
+	switch (metricName) {
+	case 'RSSI':
+		if (value >= -65) {
+			percentage = 100;
+			colorClass = 'progress-green';
+		} else if (value >= -75) {
+			percentage = 75;
+			colorClass = 'progress-yellow';
+		} else if (value >= -85) {
+			percentage = 50;
+			colorClass = 'progress-orange';
+		} else {
+			percentage = 25;
+			colorClass = 'progress-red';
+		}
+		break;
+
+	case 'LTE RSRP':
+	case 'NR5G-NSA RSRP':
+	case 'NR5G-SA RSRP':
+		if (value >= -80) {
+			percentage = 100;
+			colorClass = 'progress-green';
+		} else if (value >= -90) {
+			percentage = 75;
+			colorClass = 'progress-yellow';
+		} else if (value >= -100) {
+			percentage = 50;
+			colorClass = 'progress-orange';
+		} else {
+			percentage = 25;
+			colorClass = 'progress-red';
+		}
+		break;
+
+	case 'LTE RSRQ':
+	case 'NR5G-NSA RSRQ':
+	case 'NR5G-SA RSRQ':
+		if (value >= -10) {
+			percentage = 100;
+			colorClass = 'progress-green';
+		} else if (value >= -15) {
+			percentage = 75;
+			colorClass = 'progress-yellow';
+		} else if (value >= -20) {
+			percentage = 50;
+			colorClass = 'progress-orange';
+		} else {
+			percentage = 25;
+			colorClass = 'progress-red';
+		}
+		break;
+
+	case 'LTE SINR':
+	case 'NR5G-NSA SINR':
+	case 'NR5G-SA SINR':
+		if (value >= 20) {
+			percentage = 100;
+			colorClass = 'progress-green';
+		} else if (value >= 13) {
+			percentage = 75;
+			colorClass = 'progress-yellow';
+		} else if (value >= 0) {
+			percentage = 50;
+			colorClass = 'progress-orange';
+		} else {
+			percentage = 25;
+			colorClass = 'progress-red';
+		}
+		break;
+
+	default:
+		percentage = calculatePercentage(value, min, max);
+
+		if (percentage <= 25)
+			colorClass = 'progress-red';
+		else if (percentage <= 50)
+			colorClass = 'progress-orange';
+		else if (percentage <= 75)
+			colorClass = 'progress-yellow';
+		else
+			colorClass = 'progress-green';
+		break;
+	}
+
+	return { percentage: percentage, colorClass: colorClass };
+}
+
+function updateProgressBar(elementId, valueId, rawValue, min, max, isPercentage, labelText) {
+	const wrap = document.getElementById(elementId);
+	if (!wrap) return false;
+
+	const row = wrap.closest('.px-metric-row');
 	const progressBarInner = wrap.querySelector('.progress-bar-inner');
 	const progressValue = document.getElementById(valueId);
 	const progressLabel = wrap.querySelector('.progress-inline-label');
 
-	if (!progressBarInner || !progressValue) return;
+	if (!progressBarInner || !progressValue) return false;
 
 	if (progressLabel && labelText)
 		progressLabel.innerText = labelText;
 
-	if (
-		value === null ||
-		value === undefined ||
-		isNaN(value) ||
-		value === "No Signal"
-	) {
-		progressBarInner.style.width = '0%';
-		progressBarInner.className = 'progress-bar-inner';
-		progressValue.innerText = 'No Signal';
-		return;
+	const value = normalizeMetricValue(rawValue);
+
+	if (value === null) {
+		setNoSignalState(progressBarInner, progressValue);
+		if (row) row.classList.add('hidden-row');
+		return false;
 	}
 
-	const percentage = calculatePercentage(value, min, max);
-	progressBarInner.style.width = percentage.toFixed(1) + '%';
+	if (row) row.classList.remove('hidden-row');
 
-	if (isPercentage)
-		progressValue.innerText = percentage.toFixed(0) + '%';
-	else
-		progressValue.innerText = value.toFixed(1) + ' dBm';
+	const visual = getMetricVisual(labelText, value, isPercentage, min, max);
+	const quality = getQualityText(visual.colorClass);
 
-	let colorClass = '';
+	progressBarInner.style.width = visual.percentage.toFixed(1) + '%';
+	progressBarInner.className = 'progress-bar-inner ' + visual.colorClass;
 
-	if (percentage <= 25)
-		colorClass = 'progress-red';
-	else if (percentage <= 50)
-		colorClass = 'progress-orange';
-	else if (percentage <= 75)
-		colorClass = 'progress-yellow';
-	else
-		colorClass = 'progress-green';
+	if (isPercentage) {
+		progressValue.innerText = visual.percentage.toFixed(0) + '% • ' + quality;
+	} else if (labelText.indexOf('SINR') !== -1 || labelText.indexOf('RSRQ') !== -1) {
+		progressValue.innerText = value.toFixed(1) + ' dB • ' + quality;
+	} else {
+		progressValue.innerText = value.toFixed(1) + ' dBm • ' + quality;
+	}
 
-	progressBarInner.className = 'progress-bar-inner ' + colorClass;
+	return true;
 }
 
 function showRelevantRows(networkType) {
@@ -748,7 +867,16 @@ function updateCellGridMode() {
 	}
 }
 
+function stableDataHash(data) {
+	try {
+		return JSON.stringify(data);
+	} catch (e) {
+		return String(Date.now());
+	}
+}
+
 let modemInfoBusy = false;
+let lastRenderedHash = '';
 
 function updateModemInfo() {
 	if (modemInfoBusy) return;
@@ -757,6 +885,14 @@ function updateModemInfo() {
 	fetch('<%=luci.dispatcher.build_url("admin/modem/modeminfo/get_info")%>')
 		.then(function(response) { return response.json(); })
 		.then(function(data) {
+			const currentHash = stableDataHash(data);
+
+			if (currentHash === lastRenderedHash) {
+				return;
+			}
+
+			lastRenderedHash = currentHash;
+
 			const networkInfo = getNetworkData(data);
 			const network = data["Network"] || "No Signal";
 
@@ -792,34 +928,36 @@ function updateModemInfo() {
 			toggleRow('row-scc4', scc4);
 
 			showRelevantRows(network);
-			updateCellGridMode();
 
-			updateProgressBar('signal-progress', 'signal-progress-value', parseFloat(data["Signal Strength"]), 0, 99, true, 'Signal Strength');
-			updateProgressBar('rssi-progress', 'rssi-progress-value', parseFloat(data["RSSI"]), -110, -50, false, 'RSSI');
-			updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', parseFloat(data["LTE RSRQ"]), -20, 3, false, 'LTE RSRQ');
-			updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', parseFloat(data["LTE RSRP"]), -140, -44, false, 'LTE RSRP');
-			updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', parseFloat(data["LTE SINR"]), -20, 30, false, 'LTE SINR');
-			updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', parseFloat(data["NR5G-NSA RSRQ"]), -20, 3, false, 'NR5G-NSA RSRQ');
-			updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', parseFloat(data["NR5G-NSA RSRP"]), -140, -44, false, 'NR5G-NSA RSRP');
-			updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', parseFloat(data["NR5G-NSA SINR"]), -20, 30, false, 'NR5G-NSA SINR');
-			updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', parseFloat(data["NR5G-SA RSRQ"]), -20, 3, false, 'NR5G-SA RSRQ');
-			updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', parseFloat(data["NR5G-SA RSRP"]), -140, -44, false, 'NR5G-SA RSRP');
-			updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', parseFloat(data["NR5G-SA SINR"]), -20, 30, false, 'NR5G-SA SINR');
+			updateProgressBar('signal-progress', 'signal-progress-value', data["Signal Strength"], 0, 99, true, 'Signal Strength');
+			updateProgressBar('rssi-progress', 'rssi-progress-value', data["RSSI"], -110, -50, false, 'RSSI');
+			updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', data["LTE RSRQ"], -20, 3, false, 'LTE RSRQ');
+			updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', data["LTE RSRP"], -140, -44, false, 'LTE RSRP');
+			updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', data["LTE SINR"], -20, 30, false, 'LTE SINR');
+			updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', data["NR5G-NSA RSRQ"], -20, 3, false, 'NR5G-NSA RSRQ');
+			updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', data["NR5G-NSA RSRP"], -140, -44, false, 'NR5G-NSA RSRP');
+			updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', data["NR5G-NSA SINR"], -20, 30, false, 'NR5G-NSA SINR');
+			updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', data["NR5G-SA RSRQ"], -20, 3, false, 'NR5G-SA RSRQ');
+			updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', data["NR5G-SA RSRP"], -140, -44, false, 'NR5G-SA RSRP');
+			updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', data["NR5G-SA SINR"], -20, 30, false, 'NR5G-SA SINR');
+
+			updateCellGridMode();
 		})
 		.catch(function(error) {
 			console.error('Error fetching modem info:', error);
+			lastRenderedHash = '';
 
-			updateProgressBar('signal-progress', 'signal-progress-value', NaN, 0, 99, true, 'Signal Strength');
-			updateProgressBar('rssi-progress', 'rssi-progress-value', NaN, -110, -50, false, 'RSSI');
-			updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', NaN, -20, 3, false, 'LTE RSRQ');
-			updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', NaN, -140, -44, false, 'LTE RSRP');
-			updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', NaN, -20, 30, false, 'LTE SINR');
-			updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', NaN, -20, 3, false, 'NR5G-NSA RSRQ');
-			updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', NaN, -140, -44, false, 'NR5G-NSA RSRP');
-			updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', NaN, -20, 30, false, 'NR5G-NSA SINR');
-			updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', NaN, -20, 3, false, 'NR5G-SA RSRQ');
-			updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', NaN, -140, -44, false, 'NR5G-SA RSRP');
-			updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', NaN, -20, 30, false, 'NR5G-SA SINR');
+			updateProgressBar('signal-progress', 'signal-progress-value', null, 0, 99, true, 'Signal Strength');
+			updateProgressBar('rssi-progress', 'rssi-progress-value', null, -110, -50, false, 'RSSI');
+			updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', null, -20, 3, false, 'LTE RSRQ');
+			updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', null, -140, -44, false, 'LTE RSRP');
+			updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', null, -20, 30, false, 'LTE SINR');
+			updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', null, -20, 3, false, 'NR5G-NSA RSRQ');
+			updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', null, -140, -44, false, 'NR5G-NSA RSRP');
+			updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', null, -20, 30, false, 'NR5G-NSA SINR');
+			updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', null, -20, 3, false, 'NR5G-SA RSRQ');
+			updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', null, -140, -44, false, 'NR5G-SA RSRP');
+			updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', null, -20, 30, false, 'NR5G-SA SINR');
 
 			toggleRow('row-pcc', null);
 			toggleRow('row-scc1', null);
