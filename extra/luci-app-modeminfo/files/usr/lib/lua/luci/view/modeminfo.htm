@@ -2,8 +2,9 @@
 
 <div class="px-page">
 	<h2>Modem Information</h2>
+
 	<div class="px-panel">
-		<div class="px-panel-title">General Information</div>
+		<div class="px-panel-title">General</div>
 
 		<div class="px-grid px-grid-3 px-general-grid">
 			<div class="px-stat">
@@ -39,15 +40,17 @@
 
 		<div class="px-wide-card">
 			<div class="px-label">COMM PORT</div>
-			<form method="POST" action="<%=luci.dispatcher.build_url('admin/modem/modeminfo/save_port')%>" class="px-form-row">
-				<select name="commport" id="commport-select"></select>
-				<button type="submit" class="cbi-button cbi-button-apply px-btn px-btn-install">Save</button>
+			<form method="POST" action="<%=luci.dispatcher.build_url('admin/modem/modeminfo/save_port')%>" class="px-action-form">
+				<div class="px-input-wrap">
+					<select name="commport" id="commport-select"></select>
+				</div>
+				<button type="submit" class="cbi-button cbi-button-apply px-btn px-btn-primary">Save</button>
 			</form>
 		</div>
 	</div>
 
 	<div class="px-panel">
-		<div class="px-panel-title">Signal Information</div>
+		<div class="px-panel-title">Signal</div>
 
 		<div class="px-grid px-grid-2 px-signal-top-grid">
 			<div class="px-stat">
@@ -153,7 +156,7 @@
 	</div>
 
 	<div class="px-panel">
-		<div class="px-panel-title">Cell Information</div>
+		<div class="px-panel-title">Cell</div>
 
 		<div class="px-grid px-grid-cell" id="cell-grid">
 			<div class="px-stat">
@@ -198,15 +201,17 @@
 
 		<form method="POST" action="<%=luci.dispatcher.build_url("admin/modem/modeminfo/set_refresh")%>">
 			<label class="px-form-label" for="refresh_rate">Select refresh rate</label>
-			<div class="px-form-row px-form-row-bottom">
-				<select name="refresh_rate" id="refresh_rate">
-					<option value="2" <%=refresh_rate == "2" and "selected" or ""%>>2 seconds</option>
-					<option value="5" <%=refresh_rate == "5" and "selected" or ""%>>5 seconds</option>
-					<option value="7" <%=refresh_rate == "7" and "selected" or ""%>>7 seconds</option>
-					<option value="10" <%=refresh_rate == "10" and "selected" or ""%>>10 seconds</option>
-					<option value="15" <%=refresh_rate == "15" and "selected" or ""%>>15 seconds</option>
-				</select>
-				<button type="submit" class="cbi-button cbi-button-apply px-btn px-btn-install">Save</button>
+			<div class="px-action-form">
+				<div class="px-input-wrap">
+					<select name="refresh_rate" id="refresh_rate">
+						<option value="2" <%=refresh_rate == "2" and "selected" or ""%>>2 seconds</option>
+						<option value="5" <%=refresh_rate == "5" and "selected" or ""%>>5 seconds</option>
+						<option value="7" <%=refresh_rate == "7" and "selected" or ""%>>7 seconds</option>
+						<option value="10" <%=refresh_rate == "10" and "selected" or ""%>>10 seconds</option>
+						<option value="15" <%=refresh_rate == "15" and "selected" or ""%>>15 seconds</option>
+					</select>
+				</div>
+				<button type="submit" class="cbi-button cbi-button-apply px-btn px-btn-primary">Save</button>
 			</div>
 		</form>
 	</div>
@@ -214,31 +219,34 @@
 
 <style>
 	:root {
-		--px-bg: rgba(255, 255, 255, 0.08);
+		--px-bg: rgba(255, 255, 255, 0.06);
 		--px-bg-soft: rgba(255, 255, 255, 0.10);
 		--px-bg-strong: rgba(255, 255, 255, 0.12);
-		--px-border: rgba(255, 255, 255, 0.06);
-		--px-text: #fff;
+		--px-border: rgba(255, 255, 255, 0.08);
+		--px-text: #ffffff;
 		--px-text-soft: rgba(255, 255, 255, 0.78);
-		--px-text-dim: rgba(255, 255, 255, 0.72);
-		--px-input-bg: rgba(0, 0, 0, 0.55);
+		--px-text-dim: rgba(255, 255, 255, 0.70);
+		--px-input-bg: rgba(0, 0, 0, 0.42);
+		--px-input-border: rgba(255, 255, 255, 0.08);
+		--px-input-focus: rgba(127, 127, 213, 0.45);
 		--px-progress-bg: #d4d4d8;
 		--px-progress-pill-bg: rgba(255, 255, 255, 0.92);
-		--px-title-bg: rgba(255, 255, 255, 0.12);
+		--px-shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.12);
 	}
 
 	body.px-light-mode {
-		--px-bg: rgba(255, 255, 255, 0.1);
-		--px-bg-soft: #ededee;
-		--px-bg-strong: #e7e7e8;
-		--px-border: rgba(0, 0, 0, 0.08);
+		--px-bg: rgba(255, 255, 255, 0.75);
+		--px-bg-soft: #ececef;
+		--px-bg-strong: #e6e7eb;
+		--px-border: rgba(17, 24, 39, 0.08);
 		--px-text: #1f2937;
 		--px-text-soft: rgba(31, 41, 55, 0.78);
-		--px-text-dim: rgba(31, 41, 55, 0.68);
+		--px-text-dim: rgba(31, 41, 55, 0.65);
 		--px-input-bg: #ffffff;
-		--px-progress-bg: #d4d4d8;
-		--px-progress-pill-bg: rgba(255, 255, 255, 0.95);
-		--px-title-bg: #e5e7eb;
+		--px-input-border: rgba(17, 24, 39, 0.10);
+		--px-input-focus: rgba(102, 126, 234, 0.22);
+		--px-progress-pill-bg: rgba(255, 255, 255, 0.96);
+		--px-shadow-soft: 0 6px 18px rgba(17, 24, 39, 0.05);
 	}
 
 	.px-page {
@@ -248,20 +256,17 @@
 		gap: 16px;
 	}
 
-	.px-credit {
-		font-size: 13px;
-		color: var(--px-text-soft);
-		padding-left: 2px;
-	}
-
 	.px-panel {
 		background: var(--px-bg); 
-		border-radius: 6px;
-		padding: 8px;
+		border-radius: 10px;
+		padding: 10px;
+		box-shadow: var(--px-shadow-soft);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
 	}
 
 	.px-panel-title {
-		background: var(--px-bg-soft);
+		background: var(--px-bg-soft); 
 		border-radius: 6px;
 		padding: 12px 14px;
 		font-size: 16px;
@@ -284,9 +289,7 @@
 	}
 
 	.px-grid-cell {
-		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 12px;
 	}
 
 	.px-grid-cell > .px-stat {
@@ -300,9 +303,10 @@
 	.px-stat,
 	.px-wide-card,
 	.px-metric-row {
-		background: var(--px-bg-strong);
+		background: var(--px-bg-strong); 
 		border-radius: 6px;
 		padding: 14px 16px;
+		min-width: 0;
 	}
 
 	.px-wide-card {
@@ -318,7 +322,7 @@
 	}
 
 	.px-value {
-        text-transform: capitalize;
+		text-transform: capitalize;
 		font-size: 13px;
 		color: var(--px-text);
 		line-height: 1.5;
@@ -344,7 +348,7 @@
 	.progress-bar-inner {
 		height: 100%;
 		width: 0%;
-		border-radius: 7px;
+		border-radius: 6px;
 		transition: width 0.3s ease;
 		position: absolute;
 		left: 0;
@@ -363,7 +367,7 @@
 		color: #fff;
 		white-space: nowrap;
 		pointer-events: none;
-		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
 	}
 
 	.progress-value {
@@ -376,7 +380,7 @@
 		font-weight: 700;
 		color: #6b7280;
 		background: var(--px-progress-pill-bg);
-		border-radius: 7px;
+		border-radius: 999px;
 		padding: 4px 8px;
 		line-height: 1;
 		min-width: 64px;
@@ -384,10 +388,21 @@
 		box-sizing: border-box;
 	}
 
-	.progress-red { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
-	.progress-orange { background: linear-gradient(90deg, #fa8c16, #ffc069); }
-	.progress-yellow { background: linear-gradient(90deg, #fadb14, #fff566); }
-	.progress-green { background: linear-gradient(90deg, #0df305, #017929); }
+	.progress-red {
+		background: linear-gradient(90deg, #ff4d4f, #ff7875);
+	}
+
+	.progress-orange {
+		background: linear-gradient(90deg, #fa8c16, #ffc069);
+	}
+
+	.progress-yellow {
+		background: linear-gradient(90deg, #fadb14, #fff566);
+	}
+
+	.progress-green {
+		background: linear-gradient(90deg, #52c41a, #237804);
+	}
 
 	.px-form-label {
 		display: block;
@@ -396,48 +411,87 @@
 		font-weight: 600;
 	}
 
-	.px-form-row {
-		display: flex;
-		align-items: center;
+	.px-action-form {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
 		gap: 12px;
-		flex-wrap: wrap;
+		align-items: center;
 	}
 
-	.px-form-row-bottom {
-		justify-content: flex-end;
+	.px-input-wrap {
+		position: relative;
+		min-width: 0;
 	}
 
-	.px-form-row select,
+	.px-input-wrap::after {
+		content: "";
+		position: absolute;
+		right: 14px;
+		top: 50%;
+		width: 8px;
+		height: 8px;
+		border-right: 2px solid var(--px-text-dim);
+		border-bottom: 2px solid var(--px-text-dim);
+		transform: translateY(-65%) rotate(45deg);
+		pointer-events: none;
+		opacity: 0.9;
+	}
+
+	.px-input-wrap select,
 	#refresh_rate,
 	#commport-select {
-		flex: 1 1 auto;
-		min-width: 220px;
-		height: 42px;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		width: 100%;
+		height: 44px;
 		border-radius: 6px;
 		background: var(--px-input-bg) !important;
 		color: var(--px-text) !important;
-		border: 1px solid var(--px-border) !important;
+		border: 1px solid var(--px-input-border) !important;
 		box-shadow: none !important;
-		padding: 0 12px;
+		padding: 0 42px 0 14px;
+		font-size: 13px;
+		transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 	}
 
-	body.px-light-mode .px-form-row select,
+	body.px-light-mode .px-input-wrap select,
 	body.px-light-mode #refresh_rate,
 	body.px-light-mode #commport-select {
 		color: #111827 !important;
 	}
 
-	.px-btn {
-		min-width: 130px;
-		height: 42px;
-		border: 0 !important;
-		border-radius: 6px !important;
-		font-weight: 700 !important;
-		box-shadow: none !important;
+	.px-input-wrap select:focus,
+	#refresh_rate:focus,
+	#commport-select:focus {
+		outline: none;
+		border-color: rgba(102, 126, 234, 0.45) !important;
+		box-shadow: 0 0 0 3px var(--px-input-focus) !important;
 	}
 
-	.px-btn-install {
-		background: linear-gradient(90deg, #667eea, #7f7fd5) !important;
+	.px-btn {
+		height: 44px;
+		min-width: 96px;
+		padding: 0 18px;
+		border: 0 !important;
+		border-radius: 8px !important;
+		font-size: 13px !important;
+		font-weight: 700 !important;
+		letter-spacing: .01em;
+		box-shadow: none !important;
+		transition: transform .15s ease, opacity .15s ease, filter .15s ease;
+	}
+
+	.px-btn:hover {
+		filter: brightness(1.03);
+	}
+
+	.px-btn:active {
+		transform: translateY(1px);
+	}
+
+	.px-btn-primary {
+		background: linear-gradient(135deg, #667eea, #7f7fd5) !important;
 		color: #fff !important;
 	}
 
@@ -453,10 +507,7 @@
 
 	@media screen and (max-width: 700px) {
 		.px-general-grid,
-		.px-signal-top-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-
+		.px-signal-top-grid,
 		.px-grid-cell {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
@@ -470,8 +521,8 @@
 			grid-template-columns: 1fr;
 		}
 
-		.px-panel{
-			padding: 12px;
+		.px-panel {
+			padding: 10px;
 		}
 
 		.px-stat,
@@ -481,7 +532,6 @@
 		}
 
 		.px-value {
-            text-transform: capitalize;
 			font-size: 12px;
 		}
 
@@ -501,19 +551,16 @@
 			right: 6px;
 		}
 
-		.px-form-row,
-		.px-form-row-bottom {
-			flex-direction: column;
-			align-items: stretch;
-			justify-content: stretch;
+		.px-action-form {
+			grid-template-columns: 1fr;
 		}
 
 		.px-btn,
-		.px-form-row select,
+		.px-input-wrap,
+		.px-input-wrap select,
 		#refresh_rate,
 		#commport-select {
 			width: 100%;
-			min-width: 100%;
 		}
 	}
 </style>
@@ -561,10 +608,15 @@ function updateProgressBar(elementId, valueId, value, min, max, isPercentage, la
 	if (progressLabel && labelText)
 		progressLabel.innerText = labelText;
 
-	if (isNaN(value) || value === null || value === "No Signal") {
+	if (
+		value === null ||
+		value === undefined ||
+		isNaN(value) ||
+		value === "No Signal"
+	) {
 		progressBarInner.style.width = '0%';
-		progressValue.innerText = 'No Signal';
 		progressBarInner.className = 'progress-bar-inner';
+		progressValue.innerText = 'No Signal';
 		return;
 	}
 
@@ -577,11 +629,12 @@ function updateProgressBar(elementId, valueId, value, min, max, isPercentage, la
 		progressValue.innerText = value.toFixed(1) + ' dBm';
 
 	let colorClass = '';
+
 	if (percentage <= 25)
 		colorClass = 'progress-red';
 	else if (percentage <= 50)
 		colorClass = 'progress-orange';
-	else if (percentage <= 79)
+	else if (percentage <= 75)
 		colorClass = 'progress-yellow';
 	else
 		colorClass = 'progress-green';
