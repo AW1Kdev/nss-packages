@@ -1,535 +1,821 @@
 <%+header%>
-<h2>Modem</h2>
-<p style="display: flex; align-items: center;">
-    If you like my work, please consider supporting me:
-    
-    <img id="star" 
-         src="/luci-static/resources/modeminfo/Star.svg?654407727g" 
-         loading="lazy" 
-         alt="Star" 
-         width="50px" 
-         height="20px" 
-         style="margin-left: 10px;" 
-         onerror="return imgerrorfuns(this,'https://img.shields.io/badge/Star--lightgrey?logo=github&amp;style=social')" 
-         onclick="window.open('https://github.com/solomonricky/luci-app-modeminfo', '_blank')">
 
-    <img id="sponsor" 
-         src="/luci-static/resources/modeminfo/Sponsor.svg?308407727" 
-         loading="lazy" 
-         alt="Sponsor" 
-         width="73px" 
-         height="20px" 
-         style="margin-left: 10px;" 
-         onerror="return imgerrorfuns(this,'https://img.shields.io/badge/Sponsor--lightgrey?logo=ko-fi&amp;style=social')" 
-         onclick="window.open('https://buymeacoffee.com/solomonricky', '_blank')">
+<div class="px-page">
+	<h2>Modem Information</h2>
+	<div class="px-panel">
+		<div class="px-panel-title">General Information</div>
 
-    <img id="telegram" 
-         src="/luci-static/resources/modeminfo/Telegram.svg?308407727" 
-         loading="lazy" 
-         alt="Telegram" 
-         style="margin-left: 10px;" 
-         onerror="return imgerrorfuns(this,'https://img.shields.io/badge/Telegram--lightgrey?logo=Telegram&amp;style=social')" 
-         onclick="window.open('https://t.me/myopenwrt', '_blank')">
-</p>
-</br>
+		<div class="px-grid px-grid-3 px-general-grid">
+			<div class="px-stat">
+				<div class="px-label">MODEM</div>
+				<div class="px-value" id="modem">Loading...</div>
+			</div>
 
-<h2>General</h2>
-<table class="table" id="general-info-table" style="border-spacing: 10px 20px;">
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Modem:</strong></td>
-        <td id="modem" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr></tr>
-        <td style="width: 33%; padding: 10px;"><strong>IMEI:</strong></td>
-        <td id="imei" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Temperature:</strong></td>
-        <td id="temperature" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>ISP:</strong></td>
-        <td id="isp" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Protocol:</strong></td>
-        <td id="protocol" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Firmware Version:</strong></td>
-        <td id="revision" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Comm Port:</strong></td>
-        <td id="commport" style="padding: 10px;">
-            <form method="POST" action="<%=luci.dispatcher.build_url('admin/modem/modeminfo/save_port')%>">
-                <select name="commport" id="commport-select" style="margin-bottom: 20px;">
-                </select>
-                <button type="submit" class="btn">Save</button>
-            </form>
-        </td>
-    </tr>
-</table>
+			<div class="px-stat">
+				<div class="px-label">IMEI</div>
+				<div class="px-value" id="imei">Loading...</div>
+			</div>
 
-<h2>Signal</h2>
-<table class="table" id="signal-info-table" style="border-spacing: 10px 20px;">
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Network:</strong></td>
-        <td id="network" style="padding: 10px;">Loading...</td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>CSQ:</strong></td>
-        <td id="csq" style="padding: 10px;">Loading...</td>
-    </tr>                
-    <tr id="row-signal-strength">
-        <td style="width: 33%; padding: 10px;"><strong>Signal Strength:</strong></td>
-        <td id="signal-strength" style="padding: 10px;">
-            <div id="signal-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="signal-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-rssi">
-        <td style="width: 33%; padding: 10px;"><strong>RSSI:</strong></td>
-        <td id="rssi" style="padding: 10px;">
-            <div id="rssi-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="rssi-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-lte-rsrq" class="lte-group">
-        <td style="width: 33%; padding: 10px;"><strong>LTE RSRQ:</strong></td>
-        <td id="rsrq-4g" style="padding: 10px;">
-            <div id="lte-rsrq-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="lte-rsrq-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-lte-rsrp" class="lte-group">
-        <td style="width: 33%; padding: 10px;"><strong>LTE RSRP:</strong></td>
-        <td id="lte-rsrp" style="padding: 10px;">
-            <div id="lte-rsrp-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="lte-rsrp-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-lte-sinr" class="lte-group">
-        <td style="width: 33%; padding: 10px;"><strong>LTE SINR:</strong></td>
-        <td id="lte-sinr" style="padding: 10px;">
-            <div id="lte-sinr-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="lte-sinr-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-nr5g-nsa-rsrq" class="nr5g-nsa-group">
-        <td style="width: 33%; padding: 10px;"><strong>NR5G-NSA RSRQ:</strong></td>
-        <td id="nr5g-nsa-rsrq" style="padding: 10px;">
-            <div id="nr5g-nsa-rsrq-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="nr5g-nsa-rsrq-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-nr5g-nsa-rsrp" class="nr5g-nsa-group">
-        <td style="width: 33%; padding: 10px;"><strong>NR5G-NSA RSRP:</strong></td>
-        <td id="nr5g-nsa-rsrp" style="padding: 10px;">
-            <div id="nr5g-nsa-rsrp-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="nr5g-nsa-rsrp-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-nr5g-nsa-sinr" class="nr5g-nsa-group">
-        <td style="width: 33%; padding: 10px;"><strong>NR5G-NSA SINR:</strong></td>
-        <td id="nr5g-nsa-sinr" style="padding: 10px;">
-            <div id="nr5g-nsa-sinr-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="nr5g-nsa-sinr-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-nr5g-sa-rsrq" class="nr5g-sa-group">
-        <td style="width: 33%; padding: 10px;"><strong>NR5G-SA RSRQ:</strong></td>
-        <td id="nr5g-sa-rsrq" style="padding: 10px;">
-            <div id="nr5g-sa-rsrq-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="nr5g-sa-rsrq-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-nr5g-sa-rsrp" class="nr5g-sa-group">
-        <td style="width: 33%; padding: 10px;"><strong>NR5G-SA RSRP:</strong></td>
-        <td id="nr5g-sa-rsrp" style="padding: 10px;">
-            <div id="nr5g-sa-rsrp-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="nr5g-sa-rsrp-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-    <tr id="row-nr5g-sa-sinr" class="nr5g-sa-group">
-        <td style="width: 33%; padding: 10px;"><strong>NR5G-SA SINR:</strong></td>
-        <td id="nr5g-sa-sinr" style="padding: 10px;">
-            <div id="nr5g-sa-sinr-progress" class="progress-bar">
-                <div class="progress-bar-inner"></div>
-                <div id="nr5g-sa-sinr-progress-value" class="progress-value">Loading...</div>
-            </div>
-        </td>
-    </tr>
-</table>
+			<div class="px-stat">
+				<div class="px-label">TEMPERATURE</div>
+				<div class="px-value" id="temperature">Loading...</div>
+			</div>
 
-</br>
-<h2>Cell</h2>
-<table class="table" id="cell-info-table" style="border-spacing: 10px 20px;">
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>MCC/MNC:</strong></td>
-        <td id="mcc-mnc-combined" style="padding: 10px;">
-            <span id="mcc">Loading...</span> <span id="mnc">Loading...</span>
-        </td>
-    </tr>
-    <tr>
-        <td style="width: 33%; padding: 10px;"><strong>Cell ID:</strong></td>
-        <td id="cellid-combined" style="padding: 10px;">
-            <span id="cellid">Loading...</span> (<span id="deccellid">Loading...</span>)
-        </td>
-    </tr>
-    <tr id="row-pcc">
-        <td style="width: 33%; padding: 10px;"><strong>PCC: (Band / PCI / EARFCN)</strong></td>
-        <td style="padding: 10px;">
-            <span id="pcc">Loading...</span>
-        </td>
-    </tr>
-    <tr id="row-scc1">
-        <td style="width: 33%; padding: 10px;"><strong>SCC 1:</strong></td>
-        <td style="padding: 10px;">
-            <span id="scc1">Loading...</span>
-        </td>
-    </tr>
-    <tr id="row-scc2">
-        <td style="width: 33%; padding: 10px;"><strong>SCC 2:</strong></td>
-        <td style="padding: 10px;">
-            <span id="scc2">Loading...</span>
-        </td>
-    </tr>
-    <tr id="row-scc3">
-        <td style="width: 33%; padding: 10px;"><strong>SCC 3:</strong></td>
-        <td style="padding: 10px;">
-            <span id="scc3">Loading...</span>
-        </td>
-    </tr>
-    <tr id="row-scc4">
-        <td style="width: 33%; padding: 10px;"><strong>SCC 4:</strong></td>
-        <td style="padding: 10px;">
-            <span id="scc4">Loading...</span>
-        </td>
-    </tr>
-</table>
+			<div class="px-stat">
+				<div class="px-label">ISP</div>
+				<div class="px-value" id="isp">Loading...</div>
+			</div>
 
-</br>           
-          
-<h2>Refresh Interval</h2>
-<form method="POST" action="<%=luci.dispatcher.build_url("admin/modem/modeminfo/set_refresh")%>">
-    <label for="refresh_rate">Select Refresh Rate:</label>
-    <select name="refresh_rate" id="refresh_rate" style="margin-bottom: 20px;">
-        <option value="2" <%=refresh_rate == "2" and "selected" or ""%>>2 seconds</option>
-        <option value="5" <%=refresh_rate == "5" and "selected" or ""%>>5 seconds</option>
-        <option value="7" <%=refresh_rate == "7" and "selected" or ""%>>7 seconds</option>
-        <option value="10" <%=refresh_rate == "10" and "selected" or ""%>>10 seconds</option>
-        <option value="15" <%=refresh_rate == "15" and "selected" or ""%>>15 seconds</option>
-    </select>
-    <button type="submit" class="btn">Save Refresh Rate</button>
-</form> 
+			<div class="px-stat">
+				<div class="px-label">PROTOCOL</div>
+				<div class="px-value" id="protocol">Loading...</div>
+			</div>
+
+			<div class="px-stat">
+				<div class="px-label">FIRMWARE VERSION</div>
+				<div class="px-value" id="revision">Loading...</div>
+			</div>
+		</div>
+
+		<div class="px-wide-card">
+			<div class="px-label">COMM PORT</div>
+			<form method="POST" action="<%=luci.dispatcher.build_url('admin/modem/modeminfo/save_port')%>" class="px-form-row">
+				<select name="commport" id="commport-select"></select>
+				<button type="submit" class="cbi-button cbi-button-apply px-btn px-btn-install">Save</button>
+			</form>
+		</div>
+	</div>
+
+	<div class="px-panel">
+		<div class="px-panel-title">Signal Information</div>
+
+		<div class="px-grid px-grid-2 px-signal-top-grid">
+			<div class="px-stat">
+				<div class="px-label">NETWORK</div>
+				<div class="px-value" id="network">Loading...</div>
+			</div>
+
+			<div class="px-stat">
+				<div class="px-label">CSQ</div>
+				<div class="px-value" id="csq">Loading...</div>
+			</div>
+		</div>
+
+		<div class="px-metric-list">
+			<div class="px-metric-row" id="row-signal-strength">
+				<div id="signal-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="signal-progress-label" class="progress-inline-label">SIGNAL</div>
+					<div id="signal-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row" id="row-rssi">
+				<div id="rssi-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="rssi-progress-label" class="progress-inline-label">RSSI</div>
+					<div id="rssi-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row lte-group" id="row-lte-rsrq">
+				<div id="lte-rsrq-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="lte-rsrq-progress-label" class="progress-inline-label">LTE RSRQ</div>
+					<div id="lte-rsrq-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row lte-group" id="row-lte-rsrp">
+				<div id="lte-rsrp-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="lte-rsrp-progress-label" class="progress-inline-label">LTE RSRP</div>
+					<div id="lte-rsrp-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row lte-group" id="row-lte-sinr">
+				<div id="lte-sinr-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="lte-sinr-progress-label" class="progress-inline-label">LTE SINR</div>
+					<div id="lte-sinr-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row nr5g-nsa-group" id="row-nr5g-nsa-rsrq">
+				<div id="nr5g-nsa-rsrq-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="nr5g-nsa-rsrq-progress-label" class="progress-inline-label">NR5G-NSA RSRQ</div>
+					<div id="nr5g-nsa-rsrq-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row nr5g-nsa-group" id="row-nr5g-nsa-rsrp">
+				<div id="nr5g-nsa-rsrp-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="nr5g-nsa-rsrp-progress-label" class="progress-inline-label">NR5G-NSA RSRP</div>
+					<div id="nr5g-nsa-rsrp-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row nr5g-nsa-group" id="row-nr5g-nsa-sinr">
+				<div id="nr5g-nsa-sinr-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="nr5g-nsa-sinr-progress-label" class="progress-inline-label">NR5G-NSA SINR</div>
+					<div id="nr5g-nsa-sinr-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row nr5g-sa-group" id="row-nr5g-sa-rsrq">
+				<div id="nr5g-sa-rsrq-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="nr5g-sa-rsrq-progress-label" class="progress-inline-label">NR5G-SA RSRQ</div>
+					<div id="nr5g-sa-rsrq-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row nr5g-sa-group" id="row-nr5g-sa-rsrp">
+				<div id="nr5g-sa-rsrp-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="nr5g-sa-rsrp-progress-label" class="progress-inline-label">NR5G-SA RSRP</div>
+					<div id="nr5g-sa-rsrp-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+
+			<div class="px-metric-row nr5g-sa-group" id="row-nr5g-sa-sinr">
+				<div id="nr5g-sa-sinr-progress" class="px-progress">
+					<div class="progress-bar-inner"></div>
+					<div id="nr5g-sa-sinr-progress-label" class="progress-inline-label">NR5G-SA SINR</div>
+					<div id="nr5g-sa-sinr-progress-value" class="progress-value">Loading...</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="px-panel">
+		<div class="px-panel-title">Cell Information</div>
+
+		<div class="px-grid px-grid-cell" id="cell-grid">
+			<div class="px-stat">
+				<div class="px-label">MCC / MNC</div>
+				<div class="px-value"><span id="mcc">Loading...</span> / <span id="mnc">Loading...</span></div>
+			</div>
+
+			<div class="px-stat">
+				<div class="px-label">CELL ID</div>
+				<div class="px-value"><span id="cellid">Loading...</span> (<span id="deccellid">Loading...</span>)</div>
+			</div>
+
+			<div class="px-stat" id="row-pcc">
+				<div class="px-label">PCC</div>
+				<div class="px-value"><span id="pcc">Loading...</span></div>
+			</div>
+
+			<div class="px-stat" id="row-scc1">
+				<div class="px-label">SCC 1</div>
+				<div class="px-value"><span id="scc1">Loading...</span></div>
+			</div>
+
+			<div class="px-stat" id="row-scc2">
+				<div class="px-label">SCC 2</div>
+				<div class="px-value"><span id="scc2">Loading...</span></div>
+			</div>
+
+			<div class="px-stat" id="row-scc3">
+				<div class="px-label">SCC 3</div>
+				<div class="px-value"><span id="scc3">Loading...</span></div>
+			</div>
+
+			<div class="px-stat" id="row-scc4">
+				<div class="px-label">SCC 4</div>
+				<div class="px-value"><span id="scc4">Loading...</span></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="px-panel">
+		<div class="px-panel-title">Refresh Interval</div>
+
+		<form method="POST" action="<%=luci.dispatcher.build_url("admin/modem/modeminfo/set_refresh")%>">
+			<label class="px-form-label" for="refresh_rate">Select refresh rate</label>
+			<div class="px-form-row px-form-row-bottom">
+				<select name="refresh_rate" id="refresh_rate">
+					<option value="2" <%=refresh_rate == "2" and "selected" or ""%>>2 seconds</option>
+					<option value="5" <%=refresh_rate == "5" and "selected" or ""%>>5 seconds</option>
+					<option value="7" <%=refresh_rate == "7" and "selected" or ""%>>7 seconds</option>
+					<option value="10" <%=refresh_rate == "10" and "selected" or ""%>>10 seconds</option>
+					<option value="15" <%=refresh_rate == "15" and "selected" or ""%>>15 seconds</option>
+				</select>
+				<button type="submit" class="cbi-button cbi-button-apply px-btn px-btn-install">Save</button>
+			</div>
+		</form>
+	</div>
+</div>
 
 <style>
-    .progress-bar {
-        width: 100%;
-        background-color: #ddd;
-        height: 20px;
-        border-radius: 5px;
-        position: relative;
-        margin: 5px 0;
-        overflow: hidden;
-    }
+	:root {
+		--px-bg: rgba(255, 255, 255, 0.08);
+		--px-bg-soft: rgba(255, 255, 255, 0.10);
+		--px-bg-strong: rgba(255, 255, 255, 0.12);
+		--px-border: rgba(255, 255, 255, 0.06);
+		--px-text: #fff;
+		--px-text-soft: rgba(255, 255, 255, 0.78);
+		--px-text-dim: rgba(255, 255, 255, 0.72);
+		--px-input-bg: rgba(0, 0, 0, 0.55);
+		--px-progress-bg: #d4d4d8;
+		--px-progress-pill-bg: rgba(255, 255, 255, 0.92);
+		--px-title-bg: rgba(255, 255, 255, 0.12);
+	}
 
-    .progress-bar-inner {
-        height: 100%;
-        border-radius: 5px;
-        transition: width 0.4s ease;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 1;
-    }
+	body.px-light-mode {
+		--px-bg: rgba(255, 255, 255, 0.1);
+		--px-bg-soft: #ededee;
+		--px-bg-strong: #e7e7e8;
+		--px-border: rgba(0, 0, 0, 0.08);
+		--px-text: #1f2937;
+		--px-text-soft: rgba(31, 41, 55, 0.78);
+		--px-text-dim: rgba(31, 41, 55, 0.68);
+		--px-input-bg: #ffffff;
+		--px-progress-bg: #d4d4d8;
+		--px-progress-pill-bg: rgba(255, 255, 255, 0.95);
+		--px-title-bg: #e5e7eb;
+	}
 
-    .progress-value {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #000;
-        font-weight: bold;
-        line-height: 20px;
-        z-index: 2;
-        text-align: center;
-        width: 100%;
-    }
-    
-    .hidden-row {
-        display: none;
-    }
+	.px-page {
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
 
-    .progress-red { background-color: red; }
-    .progress-orange { background-color: orange; }
-    .progress-yellow { background-color: yellow; }
-    .progress-green { background-color: lime; }
+	.px-credit {
+		font-size: 13px;
+		color: var(--px-text-soft);
+		padding-left: 2px;
+	}
+
+	.px-panel {
+		background: var(--px-bg); 
+		border-radius: 6px;
+		padding: 8px;
+	}
+
+	.px-panel-title {
+		background: var(--px-bg-soft);
+		border-radius: 6px;
+		padding: 12px 14px;
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--px-text);
+		margin-bottom: 14px;
+	}
+
+	.px-grid {
+		display: grid;
+		gap: 12px;
+	}
+
+	.px-grid-3 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.px-grid-2 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.px-grid-cell {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.px-grid-cell > .px-stat {
+		min-width: 0;
+	}
+
+	.px-grid-cell > .px-stat.px-span-full {
+		grid-column: 1 / -1;
+	}
+
+	.px-stat,
+	.px-wide-card,
+	.px-metric-row {
+		background: var(--px-bg-strong);
+		border-radius: 6px;
+		padding: 14px 16px;
+	}
+
+	.px-wide-card {
+		margin-top: 12px;
+	}
+
+	.px-label {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: .06em;
+		color: var(--px-text-dim);
+		margin-bottom: 8px;
+	}
+
+	.px-value {
+        text-transform: capitalize;
+		font-size: 13px;
+		color: var(--px-text);
+		line-height: 1.5;
+		word-break: break-word;
+	}
+
+	.px-metric-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin-top: 12px;
+	}
+
+	.px-progress {
+		width: 100%;
+		height: 30px;
+		background: var(--px-progress-bg);
+		border-radius: 6px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.progress-bar-inner {
+		height: 100%;
+		width: 0%;
+		border-radius: 7px;
+		transition: width 0.3s ease;
+		position: absolute;
+		left: 0;
+		top: 0;
+		z-index: 1;
+	}
+
+	.progress-inline-label {
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 2;
+		font-size: 11px;
+		font-weight: 600;
+		color: #fff;
+		white-space: nowrap;
+		pointer-events: none;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+	}
+
+	.progress-value {
+		position: absolute;
+		right: 8px;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 3;
+		font-size: 12px;
+		font-weight: 700;
+		color: #6b7280;
+		background: var(--px-progress-pill-bg);
+		border-radius: 7px;
+		padding: 4px 8px;
+		line-height: 1;
+		min-width: 64px;
+		text-align: center;
+		box-sizing: border-box;
+	}
+
+	.progress-red { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
+	.progress-orange { background: linear-gradient(90deg, #fa8c16, #ffc069); }
+	.progress-yellow { background: linear-gradient(90deg, #fadb14, #fff566); }
+	.progress-green { background: linear-gradient(90deg, #0df305, #017929); }
+
+	.px-form-label {
+		display: block;
+		margin-bottom: 10px;
+		color: var(--px-text);
+		font-weight: 600;
+	}
+
+	.px-form-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.px-form-row-bottom {
+		justify-content: flex-end;
+	}
+
+	.px-form-row select,
+	#refresh_rate,
+	#commport-select {
+		flex: 1 1 auto;
+		min-width: 220px;
+		height: 42px;
+		border-radius: 6px;
+		background: var(--px-input-bg) !important;
+		color: var(--px-text) !important;
+		border: 1px solid var(--px-border) !important;
+		box-shadow: none !important;
+		padding: 0 12px;
+	}
+
+	body.px-light-mode .px-form-row select,
+	body.px-light-mode #refresh_rate,
+	body.px-light-mode #commport-select {
+		color: #111827 !important;
+	}
+
+	.px-btn {
+		min-width: 130px;
+		height: 42px;
+		border: 0 !important;
+		border-radius: 6px !important;
+		font-weight: 700 !important;
+		box-shadow: none !important;
+	}
+
+	.px-btn-install {
+		background: linear-gradient(90deg, #667eea, #7f7fd5) !important;
+		color: #fff !important;
+	}
+
+	.hidden-row {
+		display: none !important;
+	}
+
+	@media screen and (max-width: 1100px) {
+		.px-grid-3 {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media screen and (max-width: 700px) {
+		.px-general-grid,
+		.px-signal-top-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.px-grid-cell {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.px-grid-cell > .px-stat.px-span-full {
+			grid-column: 1 / -1;
+		}
+
+		.px-grid-3:not(.px-general-grid):not(.px-grid-cell),
+		.px-grid-2:not(.px-signal-top-grid) {
+			grid-template-columns: 1fr;
+		}
+
+		.px-panel{
+			padding: 12px;
+		}
+
+		.px-stat,
+		.px-wide-card,
+		.px-metric-row {
+			padding: 12px;
+		}
+
+		.px-value {
+            text-transform: capitalize;
+			font-size: 12px;
+		}
+
+		.px-progress {
+			height: 36px;
+		}
+
+		.progress-inline-label {
+			left: 10px;
+			font-size: 10px;
+		}
+
+		.progress-value {
+			font-size: 11px;
+			min-width: 58px;
+			padding: 4px 10px;
+			right: 6px;
+		}
+
+		.px-form-row,
+		.px-form-row-bottom {
+			flex-direction: column;
+			align-items: stretch;
+			justify-content: stretch;
+		}
+
+		.px-btn,
+		.px-form-row select,
+		#refresh_rate,
+		#commport-select {
+			width: 100%;
+			min-width: 100%;
+		}
+	}
 </style>
 
 <script>
-function calculatePercentage(value, min, max) {
-    return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+function detectBodyColorMode() {
+	try {
+		const body = document.body;
+		const bg = window.getComputedStyle(body).backgroundColor || '';
+		const match = bg.match(/\d+/g);
+
+		if (!match || match.length < 3) {
+			body.classList.remove('px-light-mode');
+			return;
+		}
+
+		const r = parseInt(match[0], 10);
+		const g = parseInt(match[1], 10);
+		const b = parseInt(match[2], 10);
+		const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+
+		if (brightness >= 160)
+			body.classList.add('px-light-mode');
+		else
+			body.classList.remove('px-light-mode');
+	} catch (e) {
+		document.body.classList.remove('px-light-mode');
+	}
 }
 
-function updateProgressBar(elementId, valueId, value, min, max, isPercentage = false) {
-    const progressBarInner = document.querySelector(`#${elementId} .progress-bar-inner`);
-    const progressValue = document.getElementById(valueId);
+function calculatePercentage(value, min, max) {
+	return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+}
 
-    if (isNaN(value) || value === null || value === "No Signal") {
-        progressBarInner.style.width = '0%';
-        progressValue.innerText = 'No Signal';
-        progressBarInner.className = 'progress-bar-inner';
-        return;
-    }
+function updateProgressBar(elementId, valueId, value, min, max, isPercentage, labelText) {
+	const wrap = document.getElementById(elementId);
+	if (!wrap) return;
 
-    const percentage = calculatePercentage(value, min, max);
-    progressBarInner.style.width = `${percentage}%`;
+	const progressBarInner = wrap.querySelector('.progress-bar-inner');
+	const progressValue = document.getElementById(valueId);
+	const progressLabel = wrap.querySelector('.progress-inline-label');
 
-    if (isPercentage) {
-        progressValue.innerText = `${percentage.toFixed(1)}%`;
-    } else {
-        progressValue.innerText = `${value.toFixed(1)} dBm`;
-    }
+	if (!progressBarInner || !progressValue) return;
 
-    let colorClass = '';
-    if (percentage <= 25) {
-        colorClass = 'progress-red';
-    } else if (percentage <= 50) {
-        colorClass = 'progress-orange';
-    } else if (percentage <= 79) {
-        colorClass = 'progress-yellow';
-    } else {
-        colorClass = 'progress-green';
-    }
+	if (progressLabel && labelText)
+		progressLabel.innerText = labelText;
 
-    progressBarInner.className = `progress-bar-inner ${colorClass}`;
+	if (isNaN(value) || value === null || value === "No Signal") {
+		progressBarInner.style.width = '0%';
+		progressValue.innerText = 'No Signal';
+		progressBarInner.className = 'progress-bar-inner';
+		return;
+	}
+
+	const percentage = calculatePercentage(value, min, max);
+	progressBarInner.style.width = percentage.toFixed(1) + '%';
+
+	if (isPercentage)
+		progressValue.innerText = percentage.toFixed(0) + '%';
+	else
+		progressValue.innerText = value.toFixed(1) + ' dBm';
+
+	let colorClass = '';
+	if (percentage <= 25)
+		colorClass = 'progress-red';
+	else if (percentage <= 50)
+		colorClass = 'progress-orange';
+	else if (percentage <= 79)
+		colorClass = 'progress-yellow';
+	else
+		colorClass = 'progress-green';
+
+	progressBarInner.className = 'progress-bar-inner ' + colorClass;
 }
 
 function showRelevantRows(networkType) {
-    const allGroups = ['lte-group', 'nr5g-nsa-group', 'nr5g-sa-group'];
+	const allGroups = ['lte-group', 'nr5g-nsa-group', 'nr5g-sa-group'];
 
-    allGroups.forEach(groupClass => {
-        document.querySelectorAll(`.${groupClass}`).forEach(row => {
-            row.classList.add('hidden-row');
-        });
-    });
+	allGroups.forEach(function(groupClass) {
+		document.querySelectorAll('.' + groupClass).forEach(function(row) {
+			row.classList.add('hidden-row');
+		});
+	});
 
-    document.getElementById('row-rssi').classList.add('hidden-row');
+	const rssiRow = document.getElementById('row-rssi');
+	if (rssiRow)
+		rssiRow.classList.add('hidden-row');
 
-    if (networkType.includes("NR5G-SA")) {
-        document.querySelectorAll('.nr5g-sa-group').forEach(row => {
-            row.classList.remove('hidden-row');
-        });
-    } else if (networkType.includes("NR5G-NSA")) {
-        document.querySelectorAll('.lte-group, .nr5g-nsa-group').forEach(row => {
-            row.classList.remove('hidden-row');
-        });
-        document.getElementById('row-rssi').classList.remove('hidden-row');
-    } else if (networkType.includes("LTE")) {
-        document.querySelectorAll('.lte-group').forEach(row => {
-            row.classList.remove('hidden-row');
-        });
-        document.getElementById('row-rssi').classList.remove('hidden-row');
-    }
+	networkType = networkType || '';
+
+	if (networkType.indexOf("NR5G-SA") !== -1) {
+		document.querySelectorAll('.nr5g-sa-group').forEach(function(row) {
+			row.classList.remove('hidden-row');
+		});
+	} else if (networkType.indexOf("NR5G-NSA") !== -1) {
+		document.querySelectorAll('.lte-group, .nr5g-nsa-group').forEach(function(row) {
+			row.classList.remove('hidden-row');
+		});
+		if (rssiRow) rssiRow.classList.remove('hidden-row');
+	} else if (networkType.indexOf("LTE") !== -1) {
+		document.querySelectorAll('.lte-group').forEach(function(row) {
+			row.classList.remove('hidden-row');
+		});
+		if (rssiRow) rssiRow.classList.remove('hidden-row');
+	}
 }
 
 function getNetworkData(data) {
-    if ((data["Network"] || "").includes("NR5G-SA")) {
-        return {
-            mcc: data["NR5G-SA MCC"] || "No Signal",
-            mnc: data["NR5G-SA MNC"] || "No Signal",
-            cellid: data["NR5G-SA Cell ID"] || "No Signal",
-            deccellid: data["NR5G-SA Cell ID (Dec)"] || "No Signal"
-        };
-    } else if ((data["Network"] || "").includes("NR5G-NSA")) {
-        return {
-            mcc: data["NR5G-NSA MCC"] || "No Signal",
-            mnc: data["NR5G-NSA MNC"] || "No Signal",
-            cellid: data["LTE Cell ID"] || "No Signal",
-            deccellid: data["LTE Cell ID (Dec)"] || "No Signal"
-        };
-    } else if ((data["Network"] || "").includes("LTE")) {
-        return {
-            mcc: data["LTE MCC"] || "No Signal",
-            mnc: data["LTE MNC"] || "No Signal",
-            cellid: data["LTE Cell ID"] || "No Signal",
-            deccellid: data["LTE Cell ID (Dec)"] || "No Signal"
-        };
-    } else {
-        return {
-            mcc: "No Signal",
-            mnc: "No Signal",
-            cellid: "No Signal",
-            deccellid: "No Signal"
-        };
-    }
+	const network = data["Network"] || "";
+
+	if (network.indexOf("NR5G-SA") !== -1) {
+		return {
+			mcc: data["NR5G-SA MCC"] || "No Signal",
+			mnc: data["NR5G-SA MNC"] || "No Signal",
+			cellid: data["NR5G-SA Cell ID"] || "No Signal",
+			deccellid: data["NR5G-SA Cell ID (Dec)"] || "No Signal"
+		};
+	} else if (network.indexOf("NR5G-NSA") !== -1) {
+		return {
+			mcc: data["NR5G-NSA MCC"] || "No Signal",
+			mnc: data["NR5G-NSA MNC"] || "No Signal",
+			cellid: data["LTE Cell ID"] || "No Signal",
+			deccellid: data["LTE Cell ID (Dec)"] || "No Signal"
+		};
+	} else if (network.indexOf("LTE") !== -1) {
+		return {
+			mcc: data["LTE MCC"] || "No Signal",
+			mnc: data["LTE MNC"] || "No Signal",
+			cellid: data["LTE Cell ID"] || "No Signal",
+			deccellid: data["LTE Cell ID (Dec)"] || "No Signal"
+		};
+	}
+
+	return {
+		mcc: "No Signal",
+		mnc: "No Signal",
+		cellid: "No Signal",
+		deccellid: "No Signal"
+	};
 }
 
 function isEmptyCellValue(value) {
-    if (value === null || value === undefined) return true;
+	if (value === null || value === undefined)
+		return true;
 
-    const str = String(value).trim();
-    return (
-        str === '' ||
-        str === '-' ||
-        str === '--' ||
-        str.toLowerCase() === 'no signal' ||
-        str.toLowerCase() === 'n/a' ||
-        str.toLowerCase() === 'unknown'
-    );
+	const str = String(value).trim().toLowerCase();
+	return (
+		str === '' ||
+		str === '-' ||
+		str === '--' ||
+		str === 'no signal' ||
+		str === 'n/a' ||
+		str === 'unknown'
+	);
 }
 
 function toggleRow(rowId, value) {
-    const row = document.getElementById(rowId);
-    if (!row) return;
-
-    if (isEmptyCellValue(value)) {
-        row.style.display = 'none';
-    } else {
-        row.style.display = '';
-    }
+	const row = document.getElementById(rowId);
+	if (!row) return;
+	row.style.display = isEmptyCellValue(value) ? 'none' : '';
 }
 
+function updateCellGridMode() {
+	const grid = document.getElementById('cell-grid');
+	if (!grid) return;
+
+	const allCards = Array.prototype.slice.call(grid.children);
+
+	allCards.forEach(function(card) {
+		card.classList.remove('px-span-full');
+	});
+
+	const visibleCards = allCards.filter(function(card) {
+		return window.getComputedStyle(card).display !== 'none';
+	});
+
+	if (visibleCards.length % 2 !== 0) {
+		visibleCards[visibleCards.length - 1].classList.add('px-span-full');
+	}
+}
+
+let modemInfoBusy = false;
+
 function updateModemInfo() {
-    fetch('<%=luci.dispatcher.build_url("admin/modem/modeminfo/get_info")%>')
-        .then(response => response.json())
-        .then(data => {
-            const networkInfo = getNetworkData(data);
-            const network = data["Network"] || "No Signal";
+	if (modemInfoBusy) return;
+	modemInfoBusy = true;
 
-            document.getElementById('modem').innerText = data["Modem"] || "N/A";
-            document.getElementById('imei').innerText = data["IMEI"] || "N/A";
-            document.getElementById('isp').innerText = data["ISP"] || "N/A";
-            document.getElementById('revision').innerText = data["Revision"] || "N/A";
-            document.getElementById('protocol').innerText = data["Protocol"] || "N/A";
-            document.getElementById('temperature').innerText = data["Temperature"] || "N/A";
-            document.getElementById('network').innerText = network;
-            document.getElementById('csq').innerText = data["CSQ"] || "No Signal";
-            document.getElementById('mcc').innerText = networkInfo.mcc;
-            document.getElementById('mnc').innerText = networkInfo.mnc;
-            document.getElementById('cellid').innerText = networkInfo.cellid;
-            document.getElementById('deccellid').innerText = networkInfo.deccellid;
+	fetch('<%=luci.dispatcher.build_url("admin/modem/modeminfo/get_info")%>')
+		.then(function(response) { return response.json(); })
+		.then(function(data) {
+			const networkInfo = getNetworkData(data);
+			const network = data["Network"] || "No Signal";
 
-            const pcc = data["PCC"] || "-";
-            const scc1 = data["SCC1"] || "-";
-            const scc2 = data["SCC2"] || "-";
-            const scc3 = data["SCC3"] || "-";
-            const scc4 = data["SCC4"] || "-";
+			document.getElementById('modem').innerText = data["Modem"] || "N/A";
+			document.getElementById('imei').innerText = data["IMEI"] || "N/A";
+			document.getElementById('isp').innerText = data["ISP"] || "N/A";
+			document.getElementById('revision').innerText = data["Revision"] || "N/A";
+			document.getElementById('protocol').innerText = data["Protocol"] || "N/A";
+			document.getElementById('temperature').innerText = data["Temperature"] || "N/A";
+			document.getElementById('network').innerText = network;
+			document.getElementById('csq').innerText = data["CSQ"] || "No Signal";
+			document.getElementById('mcc').innerText = networkInfo.mcc;
+			document.getElementById('mnc').innerText = networkInfo.mnc;
+			document.getElementById('cellid').innerText = networkInfo.cellid;
+			document.getElementById('deccellid').innerText = networkInfo.deccellid;
 
-            document.getElementById('pcc').innerText = pcc;
-            document.getElementById('scc1').innerText = scc1;
-            document.getElementById('scc2').innerText = scc2;
-            document.getElementById('scc3').innerText = scc3;
-            document.getElementById('scc4').innerText = scc4;
+			const pcc = data["PCC"] || "-";
+			const scc1 = data["SCC1"] || "-";
+			const scc2 = data["SCC2"] || "-";
+			const scc3 = data["SCC3"] || "-";
+			const scc4 = data["SCC4"] || "-";
 
-            toggleRow('row-pcc', pcc);
-            toggleRow('row-scc1', scc1);
-            toggleRow('row-scc2', scc2);
-            toggleRow('row-scc3', scc3);
-            toggleRow('row-scc4', scc4);
+			document.getElementById('pcc').innerText = pcc;
+			document.getElementById('scc1').innerText = scc1;
+			document.getElementById('scc2').innerText = scc2;
+			document.getElementById('scc3').innerText = scc3;
+			document.getElementById('scc4').innerText = scc4;
 
-            showRelevantRows(network);
+			toggleRow('row-pcc', pcc);
+			toggleRow('row-scc1', scc1);
+			toggleRow('row-scc2', scc2);
+			toggleRow('row-scc3', scc3);
+			toggleRow('row-scc4', scc4);
 
-            const csqper = parseFloat(data["Signal Strength"]);
-            const rssi = parseFloat(data["RSSI"]);
-            const lte_rsrq = parseFloat(data["LTE RSRQ"]);
-            const lte_rsrp = parseFloat(data["LTE RSRP"]);
-            const lte_sinr = parseFloat(data["LTE SINR"]);
-            const nr5g_nsa_rsrq = parseFloat(data["NR5G-NSA RSRQ"]);
-            const nr5g_nsa_rsrp = parseFloat(data["NR5G-NSA RSRP"]);
-            const nr5g_nsa_sinr = parseFloat(data["NR5G-NSA SINR"]);
-            const nr5g_sa_rsrq = parseFloat(data["NR5G-SA RSRQ"]);
-            const nr5g_sa_rsrp = parseFloat(data["NR5G-SA RSRP"]);
-            const nr5g_sa_sinr = parseFloat(data["NR5G-SA SINR"]);
+			showRelevantRows(network);
+			updateCellGridMode();
 
-            updateProgressBar('signal-progress', 'signal-progress-value', csqper, 0, 99, true);
-            updateProgressBar('rssi-progress', 'rssi-progress-value', rssi, -110, -50);
-            updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', lte_rsrq, -20, 3);
-            updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', lte_rsrp, -140, -44);
-            updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', lte_sinr, -20, 30);
-            updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', nr5g_nsa_rsrq, -20, 3);
-            updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', nr5g_nsa_rsrp, -140, -44);
-            updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', nr5g_nsa_sinr, -20, 30);
-            updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', nr5g_sa_rsrq, -20, 3);
-            updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', nr5g_sa_rsrp, -140, -44);
-            updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', nr5g_sa_sinr, -20, 30);
-        })
-        .catch(error => {
-            console.error('Error fetching modem info:', error);
+			updateProgressBar('signal-progress', 'signal-progress-value', parseFloat(data["Signal Strength"]), 0, 99, true, 'Signal Strength');
+			updateProgressBar('rssi-progress', 'rssi-progress-value', parseFloat(data["RSSI"]), -110, -50, false, 'RSSI');
+			updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', parseFloat(data["LTE RSRQ"]), -20, 3, false, 'LTE RSRQ');
+			updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', parseFloat(data["LTE RSRP"]), -140, -44, false, 'LTE RSRP');
+			updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', parseFloat(data["LTE SINR"]), -20, 30, false, 'LTE SINR');
+			updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', parseFloat(data["NR5G-NSA RSRQ"]), -20, 3, false, 'NR5G-NSA RSRQ');
+			updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', parseFloat(data["NR5G-NSA RSRP"]), -140, -44, false, 'NR5G-NSA RSRP');
+			updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', parseFloat(data["NR5G-NSA SINR"]), -20, 30, false, 'NR5G-NSA SINR');
+			updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', parseFloat(data["NR5G-SA RSRQ"]), -20, 3, false, 'NR5G-SA RSRQ');
+			updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', parseFloat(data["NR5G-SA RSRP"]), -140, -44, false, 'NR5G-SA RSRP');
+			updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', parseFloat(data["NR5G-SA SINR"]), -20, 30, false, 'NR5G-SA SINR');
+		})
+		.catch(function(error) {
+			console.error('Error fetching modem info:', error);
 
-            updateProgressBar('signal-progress', 'signal-progress-value', NaN, 0, 99);
-            updateProgressBar('rssi-progress', 'rssi-progress-value', NaN, -110, -50);
-            updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', NaN, -20, 3);
-            updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', NaN, -140, -44);
-            updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', NaN, -20, 30);
-            updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', NaN, -20, 3);
-            updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', NaN, -140, -44);
-            updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', NaN, -20, 30);
-            updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', NaN, -20, 3);
-            updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', NaN, -140, -44);
-            updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', NaN, -20, 30);
+			updateProgressBar('signal-progress', 'signal-progress-value', NaN, 0, 99, true, 'Signal Strength');
+			updateProgressBar('rssi-progress', 'rssi-progress-value', NaN, -110, -50, false, 'RSSI');
+			updateProgressBar('lte-rsrq-progress', 'lte-rsrq-progress-value', NaN, -20, 3, false, 'LTE RSRQ');
+			updateProgressBar('lte-rsrp-progress', 'lte-rsrp-progress-value', NaN, -140, -44, false, 'LTE RSRP');
+			updateProgressBar('lte-sinr-progress', 'lte-sinr-progress-value', NaN, -20, 30, false, 'LTE SINR');
+			updateProgressBar('nr5g-nsa-rsrq-progress', 'nr5g-nsa-rsrq-progress-value', NaN, -20, 3, false, 'NR5G-NSA RSRQ');
+			updateProgressBar('nr5g-nsa-rsrp-progress', 'nr5g-nsa-rsrp-progress-value', NaN, -140, -44, false, 'NR5G-NSA RSRP');
+			updateProgressBar('nr5g-nsa-sinr-progress', 'nr5g-nsa-sinr-progress-value', NaN, -20, 30, false, 'NR5G-NSA SINR');
+			updateProgressBar('nr5g-sa-rsrq-progress', 'nr5g-sa-rsrq-progress-value', NaN, -20, 3, false, 'NR5G-SA RSRQ');
+			updateProgressBar('nr5g-sa-rsrp-progress', 'nr5g-sa-rsrp-progress-value', NaN, -140, -44, false, 'NR5G-SA RSRP');
+			updateProgressBar('nr5g-sa-sinr-progress', 'nr5g-sa-sinr-progress-value', NaN, -20, 30, false, 'NR5G-SA SINR');
 
-            toggleRow('row-pcc', null);
-            toggleRow('row-scc1', null);
-            toggleRow('row-scc2', null);
-            toggleRow('row-scc3', null);
-            toggleRow('row-scc4', null);
-        });
+			toggleRow('row-pcc', null);
+			toggleRow('row-scc1', null);
+			toggleRow('row-scc2', null);
+			toggleRow('row-scc3', null);
+			toggleRow('row-scc4', null);
+			updateCellGridMode();
+		})
+		.finally(function() {
+			modemInfoBusy = false;
+		});
 }
 
 function fetchCommPorts() {
-    fetch('<%=luci.dispatcher.build_url("admin/modem/modeminfo/get_ports_info")%>')
-        .then(response => response.json())
-        .then(data => {
-            const ports = data.ports;
-            const savedPort = "<%= saved_comm %>";
-            const commPortSelect = document.getElementById("commport-select");
+	fetch('<%=luci.dispatcher.build_url("admin/modem/modeminfo/get_ports_info")%>')
+		.then(function(response) { return response.json(); })
+		.then(function(data) {
+			const ports = data.ports || [];
+			const savedPort = "<%= saved_comm %>";
+			const commPortSelect = document.getElementById("commport-select");
 
-            commPortSelect.innerHTML = "";
+			commPortSelect.innerHTML = "";
 
-            ports.forEach(port => {
-                const option = document.createElement("option");
-                option.value = port;
-                option.text = port;
+			ports.forEach(function(port) {
+				const option = document.createElement("option");
+				option.value = port;
+				option.text = port;
 
-                if (port === savedPort) {
-                    option.selected = true;
-                }
+				if (port === savedPort)
+					option.selected = true;
 
-                commPortSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error fetching comm ports:', error));
+				commPortSelect.appendChild(option);
+			});
+		})
+		.catch(function(error) {
+			console.error('Error fetching comm ports:', error);
+		});
 }
 
 let refresh_rate = <%=refresh_rate%> * 1000;
-setInterval(updateModemInfo, refresh_rate);
 
 window.onload = function() {
-    fetchCommPorts();
-    updateModemInfo();
+	detectBodyColorMode();
+	fetchCommPorts();
+	updateModemInfo();
+	updateCellGridMode();
+	window.addEventListener('resize', updateCellGridMode);
+	setInterval(updateModemInfo, refresh_rate);
 };
 </script>
+
 <%+footer%>
