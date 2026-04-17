@@ -2,7 +2,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-modeminfo
-PKG_VERSION:=1.1
+PKG_VERSION:=2.0
 PKG_RELEASE:=0
 
 PKG_MAINTAINER:=YiZhen Choo <yizhen.c02@gmail.com>
