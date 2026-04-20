@@ -1,0 +1,13 @@
+--- a/qmi_wwan_f.c
++++ b/qmi_wwan_f.c
+@@ -1772,8 +1772,8 @@
+ {
+     /* Inherit standard device info */
+     usbnet_get_drvinfo(net, info);
+-    strlcpy(info->driver, driver_name, sizeof(info->driver));
+-    strlcpy(info->version, VERSION_NUMBER, sizeof(info->version));
++    strscpy(info->driver, driver_name, sizeof(info->driver));
++    strscpy(info->version, VERSION_NUMBER, sizeof(info->version));
+ }
+ 
+ static struct ethtool_ops ql_net_ethtool_ops;
